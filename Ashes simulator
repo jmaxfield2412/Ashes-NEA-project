@@ -1,0 +1,1604 @@
+import random
+#Pitch
+
+UserPitchChoice = "-1"
+PitchSeam = 50
+PitchSpin = 50
+while UserPitchChoice != "y" and UserPitchChoice != "yes" and UserPitchChoice != "n" and UserPitchChoice != "no": #It will continue going through this
+    UserPitchChoice = input("Do you want to decide the starting values of the pitch? (if no is selected, it will be randomised) (yes or no): ")
+    UserPitchChoice = UserPitchChoice.lower() #Converts the string to lower case, this allows error on the user's behalf.
+    if UserPitchChoice != "y" and UserPitchChoice != "yes" and UserPitchChoice != "n" and UserPitchChoice != "no":
+        print("")
+        print("The only accepted responses are y or yes for yes and n or no for no (capitalisations do not matter)")
+if UserPitchChoice == "y" or UserPitchChoice == "yes":
+    while PitchSeam > 10 or PitchSpin > 10 or PitchSeam < 0 or PitchSpin < 0:
+        print("")
+        PitchSeam = int(input("Enter the value for the pitch for the FAST bowlers, from 0 to 10 (10 being the most advantageous for fast bowlers, 0 being the least advantageous): "))
+        print("")
+        PitchSpin = int(input("Enter the value for the pitch for the SPIN bowlers, from 0 to 10 (10 being the most advantageous for spin bowlers, 0 being the least advantageous): "))
+        if PitchSeam > 10 or PitchSeam < 0:
+            print("")
+            print("The value for FAST bowlers needs to be between 0 and 10")
+        if PitchSpin > 10 or PitchSpin < 0:
+            print("")
+            print("The value for SPIN bowlers needs to be between 0 and 10")
+    PitchSeam = PitchSeam + 10
+else:
+    #To simulate the randomness of a pitch
+    PitchSeam = random.randint(10,20)
+    PitchSpin = random.randint(0,10)
+     
+#Queue of batsmen
+BatsmenQueue = []
+BatsmenQueue.append(11)
+BatsmenQueue.append(10)
+BatsmenQueue.append(9)
+BatsmenQueue.append(8)
+BatsmenQueue.append(7)
+BatsmenQueue.append(6)
+BatsmenQueue.append(5)
+BatsmenQueue.append(4)
+BatsmenQueue.append(3)
+BatsmenQueue.append(2)
+
+
+
+#Variables that change every over
+Variable = [0 for x in range(13)]
+Variable[0] = 0 #First Batsmen
+Variable[1] = 1 #Second Batsmen
+Variable[2] = 2 #Next Batsmen
+Variable[3] = 0 #Batter on strike
+Variable[4] = 0 #Bowler
+Variable[5] = 0 #Batting Team
+Variable[6] = 1 #Bowling Team
+Variable[7] = 0 #Inning
+Variable[8] = 0 #Recent Bowler
+Variable[9] = 0 #Overs bowled in a row by first bowler
+Variable[10] = 0 #Overs bowled in a row by second bowler
+Variable[11] = 0 #First bowler
+Variable[12] = 0 #Second bowler
+
+#Result varible
+Winner = False
+
+#Toss
+print("")
+CoinToss = random.randint(1,2)
+CoinResult = random.randint(1,2)
+#To simulate the Coin Toss
+if CoinResult == 1:
+    if CoinToss == 1:
+        print("England chose HEADS and won the toss")
+        #I chose 12 as most teams choose to bat first in Australia and so it requires a large bowling advantage for a team to choose to bowl first.
+        if PitchSeam >= 17:
+            Variable[5] = 1 #Batting Team
+            Variable[6] = 0 #Bowling Team
+            print("England chose to bowl")
+        else:
+            Variable[5] = 0 #Batting Team
+            Variable[6] = 1 #Bowling Team
+            print("England chose to bat")
+    else:
+        print("England chose TAILS and lost the toss")
+        if PitchSeam >= 17:
+            Variable[5] = 0 #Batting Team
+            Variable[6] = 1 #Bowling Team
+            print("Australia chose to bowl")
+        else:
+            Variable[5] = 1 #Batting Team
+            Variable[6] = 0 #Bowling Team
+            print("Australia chose to bat")
+else:
+    if CoinToss == 1:
+        print("England chose HEADS and lost the toss")
+        if PitchSeam >= 17:
+            Variable[5] = 0 #Batting Team
+            Variable[6] = 1 #Bowling Team
+            print("Australia chose to bowl")
+        else:
+            Variable[5] = 1 #Batting Team
+            Variable[6] = 0 #Bowling Team
+            print("Australia chose to bat")
+    else:
+        print("England chose TAILS and won the toss")
+        if PitchSeam >= 17:
+            Variable[5] = 1 #Batting Team
+            Variable[6] = 0 #Bowling Team
+            print("England chose to bowl")
+        else:
+            Variable[5] = 0 #Batting Team
+            Variable[6] = 1 #Bowling Team
+            print("England chose to bat")
+
+
+
+
+
+#Batting type
+BattingType = [[0 for y in range(6)] for x in range(7)]
+
+#These are the chances of a particular ball (which a batsmen didn't get out to) to go for a certain amount of runs.
+#It is meant to be as close as possible to a real ball in a test match.
+
+#Very Defensive batsmen
+BattingType[0][0] = 7978
+BattingType[1][0] = 8978
+BattingType[2][0] = 9428
+BattingType[3][0] = 9588
+BattingType[4][0] = 9990
+BattingType[5][0] = 9995
+BattingType[6][0] = 10000
+
+#Defensive batsmen
+BattingType[0][1] = 7732
+BattingType[1][1] = 8852
+BattingType[2][1] = 9307
+BattingType[3][1] = 9477
+BattingType[4][1] = 9985
+BattingType[5][1] = 9990
+BattingType[6][1] = 10000
+
+#Average batsmen
+BattingType[0][2] = 7532
+BattingType[1][2] = 8752
+BattingType[2][2] = 9207
+BattingType[3][2] = 9417
+BattingType[4][2] = 9957
+BattingType[5][2] = 9980
+BattingType[6][2] = 10000
+
+#Attacking batsmen
+BattingType[0][3] = 7386
+BattingType[1][3] = 8686
+BattingType[2][3] = 9186
+BattingType[3][3] = 9366
+BattingType[4][3] = 9956
+BattingType[5][3] = 9970
+BattingType[6][3] = 10000
+
+#Very Attacking batsmen
+BattingType[0][4] = 7140
+BattingType[1][4] = 8540
+BattingType[2][4] = 9065
+BattingType[3][4] = 9255
+BattingType[4][4] = 9955
+BattingType[5][4] = 9960
+BattingType[6][4] = 10000
+
+
+
+
+#Player stats:
+Cricketer = [[[0 for z in range(2)] for y in range(11)] for x in range(8)]
+
+#Data
+#[0]--Name
+#[1]--Batting average #Their real batting average
+#[2]--Batting type
+#[3]--Batting score #Batting average / ((Their real strike rate) x 0.02)
+#[4]--Do they bowl
+#[5]--Bowling average #Their real bowling average
+#[6]--Bowling score #(100 - Their bowling average) / 100
+#[7]--Bowling type
+
+
+#England
+Cricketer[0][0][0] = "R.Burns"
+Cricketer[1][0][0] = 32
+Cricketer[2][0][0] = "Average"
+Cricketer[3][0][0] = 36
+Cricketer[4][0][0] = "N"
+
+Cricketer[0][1][0] = "H.Hameed"
+Cricketer[1][1][0] = 35
+Cricketer[2][1][0] = "Very Defensive"
+Cricketer[3][1][0] = 55
+Cricketer[4][1][0] = "N"
+
+Cricketer[0][2][0] = "D.Malan"
+Cricketer[1][2][0] = 29
+Cricketer[2][2][0] = "Average"
+Cricketer[3][2][0] = 36
+Cricketer[4][2][0] = "N"
+
+Cricketer[0][3][0] = "J.Root"
+Cricketer[1][3][0] = 50
+Cricketer[2][3][0] = "Aggressive"
+Cricketer[3][3][0] = 45
+Cricketer[4][3][0] = "Y"
+Cricketer[5][3][0] = 45
+Cricketer[6][3][0] = 0.55
+Cricketer[7][3][0] = "Spin"
+
+Cricketer[0][4][0] = "J.Bairstow"
+Cricketer[1][4][0] = 34
+Cricketer[2][4][0] = "Aggressive"
+Cricketer[3][4][0] = 31
+Cricketer[4][4][0] = "N"
+
+Cricketer[0][5][0] = "O.Pope"
+Cricketer[1][5][0] = 32
+Cricketer[2][5][0] = "Aggressive"
+Cricketer[3][5][0] = 31
+Cricketer[4][5][0] = "N"
+
+Cricketer[0][6][0] = "J.Buttler"
+Cricketer[1][6][0] = 33
+Cricketer[2][6][0] = "Very Aggressive"
+Cricketer[3][6][0] = 29
+Cricketer[4][6][0] = "N"
+
+Cricketer[0][7][0] = "C.Woakes"
+Cricketer[1][7][0] = 28
+Cricketer[2][7][0] = "Aggressive"
+Cricketer[3][7][0] = 27
+Cricketer[4][7][0] = "Y"
+Cricketer[5][7][0] = 29
+Cricketer[6][7][0] = 0.71
+Cricketer[7][7][0] = "Fast"
+
+Cricketer[0][8][0] = "O.Robinson"
+Cricketer[1][8][0] = 12
+Cricketer[2][8][0] = "Defensive"
+Cricketer[3][8][0] = 16
+Cricketer[4][8][0] = "Y"
+Cricketer[5][8][0] = 20
+Cricketer[6][8][0] = 0.8
+Cricketer[7][8][0] = "Fast"
+
+Cricketer[0][9][0] = "S.Broad"
+Cricketer[1][9][0] = 19
+Cricketer[2][9][0] = "Very Aggressive "
+Cricketer[3][9][0] = 15
+Cricketer[4][9][0] = "Y"
+Cricketer[5][9][0] = 28
+Cricketer[6][9][0] = 0.72
+Cricketer[7][9][0] = "Fast"
+
+Cricketer[0][10][0] = "J.Anderson"
+Cricketer[1][10][0] = 10
+Cricketer[2][10][0] = "Very Defensive"
+Cricketer[3][10][0] = 13
+Cricketer[4][10][0] = "Y"
+Cricketer[5][10][0] = 27
+Cricketer[6][10][0] = 0.73
+Cricketer[7][10][0] = "Fast"
+
+
+#Australia
+Cricketer[0][0][1] = "D.Warner"
+Cricketer[1][0][1] = 48
+Cricketer[2][0][1] = "Very Aggressive"
+Cricketer[3][0][1] = 33
+Cricketer[4][0][1] = "N"
+
+Cricketer[0][1][1] = "M.Harris"
+Cricketer[1][1][1] = 24
+Cricketer[2][1][1] = "Aggressive"
+Cricketer[3][1][1] = 24
+Cricketer[4][1][1] = "N"
+
+Cricketer[0][2][1] = "M.Labuschagne"
+Cricketer[1][2][1] = 61
+Cricketer[2][2][1] = "Aggressive"
+Cricketer[3][2][1] = 55
+Cricketer[4][2][1] = "Y"
+Cricketer[5][2][1] = 42
+Cricketer[6][2][1] = 0.58
+Cricketer[7][2][1] = "Spin"
+
+Cricketer[0][3][1] = "S.Smith"
+Cricketer[1][3][1] = 62
+Cricketer[2][3][1] = "Aggressive"
+Cricketer[3][3][1] = 66
+Cricketer[4][3][1] = "Y"
+Cricketer[5][3][1] = 56
+Cricketer[6][3][1] = 0.44
+Cricketer[7][3][1] = "Spin"
+
+Cricketer[0][4][1] = "M.Wade"
+Cricketer[1][4][1] = 30
+Cricketer[2][4][1] = "Aggressive"
+Cricketer[3][4][1] = 30
+Cricketer[4][4][1] = "N"
+
+Cricketer[0][5][1] = "C.Green"
+Cricketer[1][5][1] = 34
+Cricketer[2][5][1] = "Defensive"
+Cricketer[3][5][1] = 42
+Cricketer[4][5][1] = "Y"
+Cricketer[5][5][1] = 36
+Cricketer[6][5][1] = 0.64
+Cricketer[7][5][1] = "Fast"
+
+Cricketer[0][6][1] = "T.Paine"
+Cricketer[1][6][1] = 33
+Cricketer[2][6][1] = "Average"
+Cricketer[3][6][1] = 36
+Cricketer[4][6][1] = "N"
+
+Cricketer[0][7][1] = "P.Cummins"
+Cricketer[1][7][1] = 17
+Cricketer[2][7][1] = "Very Defensive"
+Cricketer[3][7][1] = 23
+Cricketer[4][7][1] = "Y"
+Cricketer[5][7][1] = 22
+Cricketer[6][7][1] = 0.78
+Cricketer[7][7][1] = "Fast"
+
+Cricketer[0][8][1] = "M.Starc"
+Cricketer[1][8][1] = 22
+Cricketer[2][8][1] = "Very Aggressive"
+Cricketer[3][8][1] = 16
+Cricketer[4][8][1] = "Y"
+Cricketer[5][8][1] = 28
+Cricketer[6][8][1] = 0.72
+Cricketer[7][8][1] = "Fast"
+
+Cricketer[0][9][1] = "J.Hazlewood"
+Cricketer[1][9][1] = 12
+Cricketer[2][9][1] = "Average"
+Cricketer[3][9][1] = 13
+Cricketer[4][9][1] = "Y"
+Cricketer[5][9][1] = 26
+Cricketer[6][9][1] = 0.74
+Cricketer[7][9][1] = "Fast"
+
+Cricketer[0][10][1] = "N.Lyon"
+Cricketer[1][10][1] = 12
+Cricketer[2][10][1] = "Average"
+Cricketer[3][10][1] = 13
+Cricketer[4][10][1] = "Y"
+Cricketer[5][10][1] = 32
+Cricketer[6][10][1] = 0.68
+Cricketer[7][10][1] = "Spin"
+
+
+
+#Subroutine to find the batters score (BatBF = Batsmen's balls faced)
+#BatScore is the starting score for the Batsmen
+def BatterScore(BatScore,BatAggression,BatRuns,BatBF):
+    if BatBF <= 100:
+        #The longer the batsmen stays in, the less likely he is to get out.
+        BatScore = BatScore + (BatBF // 2)
+    elif BatBF > 150:
+        #This is to simulate tiredness and a loss of concentration, the batter's chances of getting out will increase (once he has faced more than 150 balls)
+        BatScore = BatScore + 50 - ((BatBF - 150) // 2)
+    else:
+        BatScore = BatScore + 50 #set a limit to how "in" the batsmen is
+    if BatRuns <= 100:
+        #The  more runs the batsmen score, the less likely they will get out.
+        BatScore = BatScore + (BatRuns // 2)
+    else:
+        BatScore = BatScore + 50
+    if (BatRuns >= 45 and BatRuns < 50) or (BatRuns >=90 and BatRuns < 100) or (BatRuns == 0):
+        #This is to simulate nervousness (when the batsmen hasn't scored yet, or is nearing a milestone, they are more likely to get out.)
+        BatScore = BatScore - 5
+    BatScore = BatScore + ((BatRuns // 50) * 5) #This is to simulate the boost of confidence the batsmen gets when they reach a milestone.
+    return(BatScore)
+
+
+
+#Subroutine to find the bowlers score. (BowlWick = Bowler's wickets so far in the match, BowlOvers = The amount of overs bowled by the bowler in the innings,
+#BowlOverRow = The amount of overs the bowler has bowled in a row, BowlOverMaiden = Every over which the bowler bowls which goes for 0 runs)
+#BowlScore is the starting score for the bowler
+def BowlerScore(BowlScore,BowlWick,BowlOvers,BowlOverMaiden,BowlerType,BowlOverRow,PitchSeam,PitchSpin,BallAge):
+    #This is used to get a constant, which is different for each bowler, that gives them a starting score.
+    #The lower their real life Bowling average is, the higher their starting score value is.
+    if BowlWick < 5:
+        #The more wickets the bowler has, the higher their confidence will be.
+        BowlScore = BowlScore + (BowlWick / 10) #Changed from 20 (makes the amount of "score" the bowler gains from wickets change from 0.05 to 0.1)
+    else:
+        BowlScore = BowlScore + 0.25 #Set a limit to the amount of confidence a bowler can get from wickets
+    if BowlOverMaiden <= 15: #Maiden overs are overs that go for 0 runs
+        BowlScore = BowlScore + (BowlOverMaiden / 50)
+    else:
+        BowlScore = BowlScore + 0.15 #Set a limit to the amount of confidence a bowler can get from maiden overs
+    #The more overs in a spell the bowler bowls, they gain "score". That is until they reach a certain amount of overs, when they start to get tired:
+    BallAge = BallAge % 80 #This is to simulate how the ball helps pace earlier in the age of a ball and later it will help spin.
+    #A new ball is given to the bowling side every 80 overs so that is why I used the % sign to find the overs since 80.
+    if BallAge < 15:
+        if BowlerType == "Fast":
+            BowlScore = BowlScore + 0.15
+    elif BallAge < 30:
+        if BowlerType == "Fast":
+            BowlScore = BowlScore + 0.10
+        else:
+            BowlScore = BowlScore + 0.05
+    elif BallAge < 45:
+        if BowlerType == "Fast":
+            BowlScore = BowlScore + 0.05
+        else:
+            BowlScore = BowlScore + 0.10
+    else:
+        if BowlerType == "Spin":
+            BowlScore = BowlScore + 0.15
+    if BowlerType == "Spin":
+        #Spiners are normally able to bowl more overs than fast bowlers before getting tired. With other bowlers being in between.
+        BowlScore = BowlScore + (PitchSpin/100)
+        if BowlOverRow <= 10:
+            BowlScore = BowlScore + (BowlOverRow / 50)
+        elif BowlOverRow > 15:
+            BowlScore = BowlScore - ((BowlOverRow - 15) / 50)
+    elif BowlerType == "Fast":
+        BowlScore = BowlScore + (PitchSeam/100)
+        if BowlOverRow <= 3: #Fast bowlers bowl less overs than spinbowlers
+            BowlScore = BowlScore + (BowlOverRow / 50)
+        elif BowlOverRow > 5:
+            BowlScore = BowlScore - ((BowlOverRow - 5) / 50)
+        if BowlOvers > 15:
+            BowlScore = BowlScore - ((BowlOvers - 15) / 100)
+    else:
+        if BowlOverRow <= 5:
+            BowlScore = BowlScore + (BowlOverRow / 50)
+        elif BowlOverRow > 7:
+            BowlScore = BowlScore - ((BowlOverRow - 7) / 50)
+        if BowlOvers > 20:
+            BowlScore = BowlScore - ((BowlOvers - 20) / 100)
+    return(BowlScore)
+
+
+
+
+#Function to work out the runs scored of each ball.
+def RunsScored(BatAggression,ChanceOfWicket):
+    #The more defensive the batsmen is, the slower they will score their runs.
+  if BatAggression == "Very Defensive": #Give each different type of batsmen an "i" from 0 to 4
+    AggressionNumber = 0
+  elif BatAggression == "Defensive":
+    AggressionNumber = 1
+  elif BatAggression == "Average":
+    AggressionNumber = 2
+  elif BatAggression == "Aggressive":
+    AggressionNumber = 3
+  else:
+    AggressionNumber = 4
+  RandomRuns = random.randint(0,10000)
+  #More aggressive batsmen score are more likely to score boundaries
+  if RandomRuns < BattingType[0][AggressionNumber]:
+    return(0)
+  elif RandomRuns < BattingType[1][AggressionNumber]:
+    return(1)
+  elif RandomRuns < BattingType[2][AggressionNumber]:
+    return(2)
+  elif RandomRuns < BattingType[3][AggressionNumber]:
+    return(3)
+  elif RandomRuns < BattingType[4][AggressionNumber]:
+    return(4)
+  elif RandomRuns < BattingType[5][AggressionNumber]: #5's are very unlikely in cricket
+    return(5)
+  else:
+    return(6)
+
+#How the batsmen gets out:
+def HowBatsmenGetsOutFunction(BowlerType,BowlerName,RandomFielderName):
+    RandomOut = random.randint(0,1000)
+    #Numbers are based on the percentage of different types of outs in test cricket.
+    if RandomOut < 410:
+        return("Bowled by " + BowlerName)
+    elif RandomOut < 620:
+        return("Caught by " + str(RandomFielderName) + ", Bowled by " + BowlerName)
+    elif RandomOut < 780:
+        return("Caught by WK, Bowled by " + BowlerName)
+    elif RandomOut < 920:
+        return("LBW, Bowled by " + BowlerName)
+    elif RandomOut < 970:
+        #Fast bowlers barely ever get stumpings, so stumpings can only be got as a spin bowler.
+        if BowlerType == "Spin":
+            return("Stumped, Bowled by " + BowlerName)
+        else:
+            return("LBW, Bowled by " + BowlerName)
+    else:
+        return("Run out by " + str(RandomFielderName))
+
+
+
+
+#Main Scorecard
+MainScorecard = [[0 for y in range(4)] for x in range(3)]
+MainScorecard[0][0] = 0 #Runs
+MainScorecard[1][0] = 0 #Wickets
+MainScorecard[2][0] = 0.0 #Overs
+
+MainScorecard[0][1] = 0 #Runs
+MainScorecard[1][1] = 0 #Wickets
+MainScorecard[2][1] = 0.0 #Overs
+
+MainScorecard[0][2] = 0 #Runs
+MainScorecard[1][2] = 0 #Wickets
+MainScorecard[2][2] = 0.0 #Overs
+
+MainScorecard[0][3] = 0 #Runs
+MainScorecard[1][3] = 0 #Wickets
+MainScorecard[2][3] = 0.0 #Overs
+
+
+#Find the batting and bowling scorecard
+#This is the individual scorecard.
+BattingScorecard = [[[0 for z in range(4)] for y in range(11)] for x in range(6)]
+
+#Innings 1
+
+BattingScorecard[0][0][0] = Cricketer[0][0][Variable[5]]
+BattingScorecard[1][0][0] = 0 #Runs Scored
+BattingScorecard[2][0][0] = 0 #Balls Faced
+BattingScorecard[3][0][0] = 0 #Number of 4's
+BattingScorecard[4][0][0] = 0 #Number of 6's
+BattingScorecard[5][0][0] = "*" #How out and to whom (* means not out)
+
+BattingScorecard[0][1][0] = Cricketer[0][1][Variable[5]]
+BattingScorecard[1][1][0] = 0 #Runs Scored
+BattingScorecard[2][1][0] = 0 #Balls Faced
+BattingScorecard[3][1][0] = 0 #Number of 4's
+BattingScorecard[4][1][0] = 0 #Number of 6's
+BattingScorecard[5][1][0] = "*" #How out and to whom (* means not out)
+
+BattingScorecard[0][2][0] = Cricketer[0][2][Variable[5]]
+BattingScorecard[1][2][0] = 0 #Runs Scored
+BattingScorecard[2][2][0] = 0 #Balls Faced
+BattingScorecard[3][2][0] = 0 #Number of 4's
+BattingScorecard[4][2][0] = 0 #Number of 6's
+BattingScorecard[5][2][0] = "*" #How out and to whom (* means not out)
+
+BattingScorecard[0][3][0] = Cricketer[0][3][Variable[5]]
+BattingScorecard[1][3][0] = 0 #Runs Scored
+BattingScorecard[2][3][0] = 0 #Balls Faced
+BattingScorecard[3][3][0] = 0 #Number of 4's
+BattingScorecard[4][3][0] = 0 #Number of 6's
+BattingScorecard[5][3][0] = "*" #How out and to whom (* means not out)
+
+BattingScorecard[0][4][0] = Cricketer[0][4][Variable[5]]
+BattingScorecard[1][4][0] = 0 #Runs Scored
+BattingScorecard[2][4][0] = 0 #Balls Faced
+BattingScorecard[3][4][0] = 0 #Number of 4's
+BattingScorecard[4][4][0] = 0 #Number of 6's
+BattingScorecard[5][4][0] = "*" #How out and to whom (* means not out)
+
+BattingScorecard[0][5][0] = Cricketer[0][5][Variable[5]]
+BattingScorecard[1][5][0] = 0 #Runs Scored
+BattingScorecard[2][5][0] = 0 #Balls Faced
+BattingScorecard[3][5][0] = 0 #Number of 4's
+BattingScorecard[4][5][0] = 0 #Number of 6's
+BattingScorecard[5][5][0] = "*" #How out and to whom (* means not out)
+
+BattingScorecard[0][6][0] = Cricketer[0][6][Variable[5]]
+BattingScorecard[1][6][0] = 0 #Runs Scored
+BattingScorecard[2][6][0] = 0 #Balls Faced
+BattingScorecard[3][6][0] = 0 #Number of 4's
+BattingScorecard[4][6][0] = 0 #Number of 6's
+BattingScorecard[5][6][0] = "*" #How out and to whom (* means not out)
+
+BattingScorecard[0][7][0] = Cricketer[0][7][Variable[5]]
+BattingScorecard[1][7][0] = 0 #Runs Scored
+BattingScorecard[2][7][0] = 0 #Balls Faced
+BattingScorecard[3][7][0] = 0 #Number of 4's
+BattingScorecard[4][7][0] = 0 #Number of 6's
+BattingScorecard[5][7][0] = "*" #How out and to whom (* means not out)
+
+BattingScorecard[0][8][0] = Cricketer[0][8][Variable[5]]
+BattingScorecard[1][8][0] = 0 #Runs Scored
+BattingScorecard[2][8][0] = 0 #Balls Faced
+BattingScorecard[3][8][0] = 0 #Number of 4's
+BattingScorecard[4][8][0] = 0 #Number of 6's
+BattingScorecard[5][8][0] = "*" #How out and to whom (* means not out)
+
+BattingScorecard[0][9][0] = Cricketer[0][9][Variable[5]]
+BattingScorecard[1][9][0] = 0 #Runs Scored
+BattingScorecard[2][9][0] = 0 #Balls Faced
+BattingScorecard[3][9][0] = 0 #Number of 4's
+BattingScorecard[4][9][0] = 0 #Number of 6's
+BattingScorecard[5][9][0] = "*" #How out and to whom (* means not out)
+
+BattingScorecard[0][10][0] = Cricketer[0][10][Variable[5]]
+BattingScorecard[1][10][0] = 0 #Runs Scored
+BattingScorecard[2][10][0] = 0 #Balls Faced
+BattingScorecard[3][10][0] = 0 #Number of 4's
+BattingScorecard[4][10][0] = 0 #Number of 6's
+BattingScorecard[5][10][0] = "*" #How out and to whom (* means not out)
+
+#Innings 2
+
+BattingScorecard[0][0][1] = Cricketer[0][0][Variable[6]]
+BattingScorecard[1][0][1] = 0 #Runs Scored
+BattingScorecard[2][0][1] = 0 #Balls Faced
+BattingScorecard[3][0][1] = 0 #Number of 4's
+BattingScorecard[4][0][1] = 0 #Number of 6's
+BattingScorecard[5][0][1] = "*" #How out and to whom (* means not out)
+
+BattingScorecard[0][1][1] = Cricketer[0][1][Variable[6]]
+BattingScorecard[1][1][1] = 0 #Runs Scored
+BattingScorecard[2][1][1] = 0 #Balls Faced
+BattingScorecard[3][1][1] = 0 #Number of 4's
+BattingScorecard[4][1][1] = 0 #Number of 6's
+BattingScorecard[5][1][1] = "*" #How out and to whom (* means not out)
+
+BattingScorecard[0][2][1] = Cricketer[0][2][Variable[6]]
+BattingScorecard[1][2][1] = 0 #Runs Scored
+BattingScorecard[2][2][1] = 0 #Balls Faced
+BattingScorecard[3][2][1] = 0 #Number of 4's
+BattingScorecard[4][2][1] = 0 #Number of 6's
+BattingScorecard[5][2][1] = "*" #How out and to whom (* means not out)
+
+BattingScorecard[0][3][1] = Cricketer[0][3][Variable[6]]
+BattingScorecard[1][3][1] = 0 #Runs Scored
+BattingScorecard[2][3][1] = 0 #Balls Faced
+BattingScorecard[3][3][1] = 0 #Number of 4's
+BattingScorecard[4][3][1] = 0 #Number of 6's
+BattingScorecard[5][3][1] = "*" #How out and to whom (* means not out)
+
+BattingScorecard[0][4][1] = Cricketer[0][4][Variable[6]]
+BattingScorecard[1][4][1] = 0 #Runs Scored
+BattingScorecard[2][4][1] = 0 #Balls Faced
+BattingScorecard[3][4][1] = 0 #Number of 4's
+BattingScorecard[4][4][1] = 0 #Number of 6's
+BattingScorecard[5][4][1] = "*" #How out and to whom (* means not out)
+
+BattingScorecard[0][5][1] = Cricketer[0][5][Variable[6]]
+BattingScorecard[1][5][1] = 0 #Runs Scored
+BattingScorecard[2][5][1] = 0 #Balls Faced
+BattingScorecard[3][5][1] = 0 #Number of 4's
+BattingScorecard[4][5][1] = 0 #Number of 6's
+BattingScorecard[5][5][1] = "*" #How out and to whom (* means not out)
+
+BattingScorecard[0][6][1] = Cricketer[0][6][Variable[6]]
+BattingScorecard[1][6][1] = 0 #Runs Scored
+BattingScorecard[2][6][1] = 0 #Balls Faced
+BattingScorecard[3][6][1] = 0 #Number of 4's
+BattingScorecard[4][6][1] = 0 #Number of 6's
+BattingScorecard[5][6][1] = "*" #How out and to whom (* means not out)
+
+BattingScorecard[0][7][1] = Cricketer[0][7][Variable[6]]
+BattingScorecard[1][7][1] = 0 #Runs Scored
+BattingScorecard[2][7][1] = 0 #Balls Faced
+BattingScorecard[3][7][1] = 0 #Number of 4's
+BattingScorecard[4][7][1] = 0 #Number of 6's
+BattingScorecard[5][7][1] = "*" #How out and to whom (* means not out)
+
+BattingScorecard[0][8][1] = Cricketer[0][8][Variable[6]]
+BattingScorecard[1][8][1] = 0 #Runs Scored
+BattingScorecard[2][8][1] = 0 #Balls Faced
+BattingScorecard[3][8][1] = 0 #Number of 4's
+BattingScorecard[4][8][1] = 0 #Number of 6's
+BattingScorecard[5][8][1] = "*" #How out and to whom (* means not out)
+
+BattingScorecard[0][9][1] = Cricketer[0][9][Variable[6]]
+BattingScorecard[1][9][1] = 0 #Runs Scored
+BattingScorecard[2][9][1] = 0 #Balls Faced
+BattingScorecard[3][9][1] = 0 #Number of 4's
+BattingScorecard[4][9][1] = 0 #Number of 6's
+BattingScorecard[5][9][1] = "*" #How out and to whom (* means not out)
+
+BattingScorecard[0][10][1] = Cricketer[0][10][Variable[6]]
+BattingScorecard[1][10][1] = 0 #Runs Scored
+BattingScorecard[2][10][1] = 0 #Balls Faced
+BattingScorecard[3][10][1] = 0 #Number of 4's
+BattingScorecard[4][10][1] = 0 #Number of 6's
+BattingScorecard[5][10][1] = "*" #How out and to whom (* means not out)
+
+#Innings 3
+
+BattingScorecard[0][0][2] = Cricketer[0][0][Variable[5]]
+BattingScorecard[1][0][2] = 0 #Runs Scored
+BattingScorecard[2][0][2] = 0 #Balls Faced
+BattingScorecard[3][0][2] = 0 #Number of 4's
+BattingScorecard[4][0][2] = 0 #Number of 6's
+BattingScorecard[5][0][2] = "*" #How out and to whom (* means not out)
+
+BattingScorecard[0][1][2] = Cricketer[0][1][Variable[5]]
+BattingScorecard[1][1][2] = 0 #Runs Scored
+BattingScorecard[2][1][2] = 0 #Balls Faced
+BattingScorecard[3][1][2] = 0 #Number of 4's
+BattingScorecard[4][1][2] = 0 #Number of 6's
+BattingScorecard[5][1][2] = "*" #How out and to whom (* means not out)
+
+BattingScorecard[0][2][2] = Cricketer[0][2][Variable[5]]
+BattingScorecard[1][2][2] = 0 #Runs Scored
+BattingScorecard[2][2][2] = 0 #Balls Faced
+BattingScorecard[3][2][2] = 0 #Number of 4's
+BattingScorecard[4][2][2] = 0 #Number of 6's
+BattingScorecard[5][2][2] = "*" #How out and to whom (* means not out)
+
+BattingScorecard[0][3][2] = Cricketer[0][3][Variable[5]]
+BattingScorecard[1][3][2] = 0 #Runs Scored
+BattingScorecard[2][3][2] = 0 #Balls Faced
+BattingScorecard[3][3][2] = 0 #Number of 4's
+BattingScorecard[4][3][2] = 0 #Number of 6's
+BattingScorecard[5][3][2] = "*" #How out and to whom (* means not out)
+
+BattingScorecard[0][4][2] = Cricketer[0][4][Variable[5]]
+BattingScorecard[1][4][2] = 0 #Runs Scored
+BattingScorecard[2][4][2] = 0 #Balls Faced
+BattingScorecard[3][4][2] = 0 #Number of 4's
+BattingScorecard[4][4][2] = 0 #Number of 6's
+BattingScorecard[5][4][2] = "*" #How out and to whom (* means not out)
+
+BattingScorecard[0][5][2] = Cricketer[0][5][Variable[5]]
+BattingScorecard[1][5][2] = 0 #Runs Scored
+BattingScorecard[2][5][2] = 0 #Balls Faced
+BattingScorecard[3][5][2] = 0 #Number of 4's
+BattingScorecard[4][5][2] = 0 #Number of 6's
+BattingScorecard[5][5][2] = "*" #How out and to whom (* means not out)
+
+BattingScorecard[0][6][2] = Cricketer[0][6][Variable[5]]
+BattingScorecard[1][6][2] = 0 #Runs Scored
+BattingScorecard[2][6][2] = 0 #Balls Faced
+BattingScorecard[3][6][2] = 0 #Number of 4's
+BattingScorecard[4][6][2] = 0 #Number of 6's
+BattingScorecard[5][6][2] = "*" #How out and to whom (* means not out)
+
+BattingScorecard[0][7][2] = Cricketer[0][7][Variable[5]]
+BattingScorecard[1][7][2] = 0 #Runs Scored
+BattingScorecard[2][7][2] = 0 #Balls Faced
+BattingScorecard[3][7][2] = 0 #Number of 4's
+BattingScorecard[4][7][2] = 0 #Number of 6's
+BattingScorecard[5][7][2] = "*" #How out and to whom (* means not out)
+
+BattingScorecard[0][8][2] = Cricketer[0][8][Variable[5]]
+BattingScorecard[1][8][2] = 0 #Runs Scored
+BattingScorecard[2][8][2] = 0 #Balls Faced
+BattingScorecard[3][8][2] = 0 #Number of 4's
+BattingScorecard[4][8][2] = 0 #Number of 6's
+BattingScorecard[5][8][2] = "*" #How out and to whom (* means not out)
+
+BattingScorecard[0][9][2] = Cricketer[0][9][Variable[5]]
+BattingScorecard[1][9][2] = 0 #Runs Scored
+BattingScorecard[2][9][2] = 0 #Balls Faced
+BattingScorecard[3][9][2] = 0 #Number of 4's
+BattingScorecard[4][9][2] = 0 #Number of 6's
+BattingScorecard[5][9][2] = "*" #How out and to whom (* means not out)
+
+BattingScorecard[0][10][2] = Cricketer[0][10][Variable[5]]
+BattingScorecard[1][10][2] = 0 #Runs Scored
+BattingScorecard[2][10][2] = 0 #Balls Faced
+BattingScorecard[3][10][2] = 0 #Number of 4's
+BattingScorecard[4][10][2] = 0 #Number of 6's
+BattingScorecard[5][10][2] = "*" #How out and to whom (* means not out)
+
+#Innings 4
+
+BattingScorecard[0][0][3] = Cricketer[0][0][Variable[6]]
+BattingScorecard[1][0][3] = 0 #Runs Scored
+BattingScorecard[2][0][3] = 0 #Balls Faced
+BattingScorecard[3][0][3] = 0 #Number of 4's
+BattingScorecard[4][0][3] = 0 #Number of 6's
+BattingScorecard[5][0][3] = "*" #How out and to whom (* means not out)
+
+BattingScorecard[0][1][3] = Cricketer[0][1][Variable[6]]
+BattingScorecard[1][1][3] = 0 #Runs Scored
+BattingScorecard[2][1][3] = 0 #Balls Faced
+BattingScorecard[3][1][3] = 0 #Number of 4's
+BattingScorecard[4][1][3] = 0 #Number of 6's
+BattingScorecard[5][1][3] = "*" #How out and to whom (* means not out)
+
+BattingScorecard[0][2][3] = Cricketer[0][2][Variable[6]]
+BattingScorecard[1][2][3] = 0 #Runs Scored
+BattingScorecard[2][2][3] = 0 #Balls Faced
+BattingScorecard[3][2][3] = 0 #Number of 4's
+BattingScorecard[4][2][3] = 0 #Number of 6's
+BattingScorecard[5][2][3] = "*" #How out and to whom (* means not out)
+
+BattingScorecard[0][3][3] = Cricketer[0][3][Variable[6]]
+BattingScorecard[1][3][3] = 0 #Runs Scored
+BattingScorecard[2][3][3] = 0 #Balls Faced
+BattingScorecard[3][3][3] = 0 #Number of 4's
+BattingScorecard[4][3][3] = 0 #Number of 6's
+BattingScorecard[5][3][3] = "*" #How out and to whom (* means not out)
+
+BattingScorecard[0][4][3] = Cricketer[0][4][Variable[6]]
+BattingScorecard[1][4][3] = 0 #Runs Scored
+BattingScorecard[2][4][3] = 0 #Balls Faced
+BattingScorecard[3][4][3] = 0 #Number of 4's
+BattingScorecard[4][4][3] = 0 #Number of 6's
+BattingScorecard[5][4][3] = "*" #How out and to whom (* means not out)
+
+BattingScorecard[0][5][3] = Cricketer[0][5][Variable[6]]
+BattingScorecard[1][5][3] = 0 #Runs Scored
+BattingScorecard[2][5][3] = 0 #Balls Faced
+BattingScorecard[3][5][3] = 0 #Number of 4's
+BattingScorecard[4][5][3] = 0 #Number of 6's
+BattingScorecard[5][5][3] = "*" #How out and to whom (* means not out)
+
+BattingScorecard[0][6][3] = Cricketer[0][6][Variable[6]]
+BattingScorecard[1][6][3] = 0 #Runs Scored
+BattingScorecard[2][6][3] = 0 #Balls Faced
+BattingScorecard[3][6][3] = 0 #Number of 4's
+BattingScorecard[4][6][3] = 0 #Number of 6's
+BattingScorecard[5][6][3] = "*" #How out and to whom (* means not out)
+
+BattingScorecard[0][7][3] = Cricketer[0][7][Variable[6]]
+BattingScorecard[1][7][3] = 0 #Runs Scored
+BattingScorecard[2][7][3] = 0 #Balls Faced
+BattingScorecard[3][7][3] = 0 #Number of 4's
+BattingScorecard[4][7][3] = 0 #Number of 6's
+BattingScorecard[5][7][3] = "*" #How out and to whom (* means not out)
+
+BattingScorecard[0][8][3] = Cricketer[0][8][Variable[6]]
+BattingScorecard[1][8][3] = 0 #Runs Scored
+BattingScorecard[2][8][3] = 0 #Balls Faced
+BattingScorecard[3][8][3] = 0 #Number of 4's
+BattingScorecard[4][8][3] = 0 #Number of 6's
+BattingScorecard[5][8][3] = "*" #How out and to whom (* means not out)
+
+BattingScorecard[0][9][3] = Cricketer[0][9][Variable[6]]
+BattingScorecard[1][9][3] = 0 #Runs Scored
+BattingScorecard[2][9][3] = 0 #Balls Faced
+BattingScorecard[3][9][3] = 0 #Number of 4's
+BattingScorecard[4][9][3] = 0 #Number of 6's
+BattingScorecard[5][9][3] = "*" #How out and to whom (* means not out)
+
+BattingScorecard[0][10][3] = Cricketer[0][10][Variable[6]]
+BattingScorecard[1][10][3] = 0 #Runs Scored
+BattingScorecard[2][10][3] = 0 #Balls Faced
+BattingScorecard[3][10][3] = 0 #Number of 4's
+BattingScorecard[4][10][3] = 0 #Number of 6's
+BattingScorecard[5][10][3] = "*" #How out and to whom (* means not out)
+
+#Bowling scorecard
+BowlingScorecard = [[[0 for z in range(4)] for y in range(11)] for x in range(5)]
+
+#Innings 1
+
+BowlingScorecard[0][0][0] = Cricketer[0][0][Variable[6]]
+BowlingScorecard[1][0][0] = 0 #Wickets
+BowlingScorecard[2][0][0] = 0 #Runs gone for
+BowlingScorecard[3][0][0] = 0 #Number of overs bowled
+BowlingScorecard[4][0][0] = 0 #Number of maiden overs
+
+BowlingScorecard[0][1][0] = Cricketer[0][1][Variable[6]]
+BowlingScorecard[1][1][0] = 0 #Wickets
+BowlingScorecard[2][1][0] = 0 #Runs gone for
+BowlingScorecard[3][1][0] = 0 #Number of overs bowled
+BowlingScorecard[4][1][0] = 0 #Number of maiden overs
+
+BowlingScorecard[0][2][0] = Cricketer[0][2][Variable[6]]
+BowlingScorecard[1][2][0] = 0 #Wickets
+BowlingScorecard[2][2][0] = 0 #Runs gone for
+BowlingScorecard[3][2][0] = 0 #Number of overs bowled
+BowlingScorecard[4][2][0] = 0 #Number of maiden overs
+
+BowlingScorecard[0][3][0] = Cricketer[0][3][Variable[6]]
+BowlingScorecard[1][3][0] = 0 #Wickets
+BowlingScorecard[2][3][0] = 0 #Runs gone for
+BowlingScorecard[3][3][0] = 0 #Number of overs bowled
+BowlingScorecard[4][3][0] = 0 #Number of maiden overs
+
+BowlingScorecard[0][4][0] = Cricketer[0][4][Variable[6]]
+BowlingScorecard[1][4][0] = 0 #Wickets
+BowlingScorecard[2][4][0] = 0 #Runs gone for
+BowlingScorecard[3][4][0] = 0 #Number of overs bowled
+BowlingScorecard[4][4][0] = 0 #Number of maiden overs
+
+BowlingScorecard[0][5][0] = Cricketer[0][5][Variable[6]]
+BowlingScorecard[1][5][0] = 0 #Wickets
+BowlingScorecard[2][5][0] = 0 #Runs gone for
+BowlingScorecard[3][5][0] = 0 #Number of overs bowled
+BowlingScorecard[4][5][0] = 0 #Number of maiden overs
+
+BowlingScorecard[0][6][0] = Cricketer[0][6][Variable[6]]
+BowlingScorecard[1][6][0] = 0 #Wickets
+BowlingScorecard[2][6][0] = 0 #Runs gone for
+BowlingScorecard[3][6][0] = 0 #Number of overs bowled
+BowlingScorecard[4][6][0] = 0 #Number of maiden overs
+
+BowlingScorecard[0][7][0] = Cricketer[0][7][Variable[6]]
+BowlingScorecard[1][7][0] = 0 #Wickets
+BowlingScorecard[2][7][0] = 0 #Runs gone for
+BowlingScorecard[3][7][0] = 0 #Number of overs bowled
+BowlingScorecard[4][7][0] = 0 #Number of maiden overs
+
+BowlingScorecard[0][8][0] = Cricketer[0][8][Variable[6]]
+BowlingScorecard[1][8][0] = 0 #Wickets
+BowlingScorecard[2][8][0] = 0 #Runs gone for
+BowlingScorecard[3][8][0] = 0 #Number of overs bowled
+BowlingScorecard[4][8][0] = 0 #Number of maiden overs
+
+BowlingScorecard[0][9][0] = Cricketer[0][9][Variable[6]]
+BowlingScorecard[1][9][0] = 0 #Wickets
+BowlingScorecard[2][9][0] = 0 #Runs gone for
+BowlingScorecard[3][9][0] = 0 #Number of overs bowled
+BowlingScorecard[4][9][0] = 0 #Number of maiden overs
+
+BowlingScorecard[0][10][0] = Cricketer[0][10][Variable[6]]
+BowlingScorecard[1][10][0] = 0 #Wickets
+BowlingScorecard[2][10][0] = 0 #Runs gone for
+BowlingScorecard[3][10][0] = 0 #Number of overs bowled
+BowlingScorecard[4][10][0] = 0 #Number of maiden overs
+
+#Innings 2
+
+BowlingScorecard[0][0][1] = Cricketer[0][0][Variable[5]]
+BowlingScorecard[1][0][1] = 0 #Wickets
+BowlingScorecard[2][0][1] = 0 #Runs gone for
+BowlingScorecard[3][0][1] = 0 #Number of overs bowled
+BowlingScorecard[4][0][1] = 0 #Number of maiden overs
+
+BowlingScorecard[0][1][1] = Cricketer[0][1][Variable[5]]
+BowlingScorecard[1][1][1] = 0 #Wickets
+BowlingScorecard[2][1][1] = 0 #Runs gone for
+BowlingScorecard[3][1][1] = 0 #Number of overs bowled
+BowlingScorecard[4][1][1] = 0 #Number of maiden overs
+
+BowlingScorecard[0][2][1] = Cricketer[0][2][Variable[5]]
+BowlingScorecard[1][2][1] = 0 #Wickets
+BowlingScorecard[2][2][1] = 0 #Runs gone for
+BowlingScorecard[3][2][1] = 0 #Number of overs bowled
+BowlingScorecard[4][2][1] = 0 #Number of maiden overs
+
+BowlingScorecard[0][3][1] = Cricketer[0][3][Variable[5]]
+BowlingScorecard[1][3][1] = 0 #Wickets
+BowlingScorecard[2][3][1] = 0 #Runs gone for
+BowlingScorecard[3][3][1] = 0 #Number of overs bowled
+BowlingScorecard[4][3][1] = 0 #Number of maiden overs
+
+BowlingScorecard[0][4][1] = Cricketer[0][4][Variable[5]]
+BowlingScorecard[1][4][1] = 0 #Wickets
+BowlingScorecard[2][4][1] = 0 #Runs gone for
+BowlingScorecard[3][4][1] = 0 #Number of overs bowled
+BowlingScorecard[4][4][1] = 0 #Number of maiden overs
+
+BowlingScorecard[0][5][1] = Cricketer[0][5][Variable[5]]
+BowlingScorecard[1][5][1] = 0 #Wickets
+BowlingScorecard[2][5][1] = 0 #Runs gone for
+BowlingScorecard[3][5][1] = 0 #Number of overs bowled
+BowlingScorecard[4][5][1] = 0 #Number of maiden overs
+
+BowlingScorecard[0][6][1] = Cricketer[0][6][Variable[5]]
+BowlingScorecard[1][6][1] = 0 #Wickets
+BowlingScorecard[2][6][1] = 0 #Runs gone for
+BowlingScorecard[3][6][1] = 0 #Number of overs bowled
+BowlingScorecard[4][6][1] = 0 #Number of maiden overs
+
+BowlingScorecard[0][7][1] = Cricketer[0][7][Variable[5]]
+BowlingScorecard[1][7][1] = 0 #Wickets
+BowlingScorecard[2][7][1] = 0 #Runs gone for
+BowlingScorecard[3][7][1] = 0 #Number of overs bowled
+BowlingScorecard[4][7][1] = 0 #Number of maiden overs
+
+BowlingScorecard[0][8][1] = Cricketer[0][8][Variable[5]]
+BowlingScorecard[1][8][1] = 0 #Wickets
+BowlingScorecard[2][8][1] = 0 #Runs gone for
+BowlingScorecard[3][8][1] = 0 #Number of overs bowled
+BowlingScorecard[4][8][1] = 0 #Number of maiden overs
+
+BowlingScorecard[0][9][1] = Cricketer[0][9][Variable[5]]
+BowlingScorecard[1][9][1] = 0 #Wickets
+BowlingScorecard[2][9][1] = 0 #Runs gone for
+BowlingScorecard[3][9][1] = 0 #Number of overs bowled
+BowlingScorecard[4][9][1] = 0 #Number of maiden overs
+
+BowlingScorecard[0][10][1] = Cricketer[0][10][Variable[5]]
+BowlingScorecard[1][10][1] = 0 #Wickets
+BowlingScorecard[2][10][1] = 0 #Runs gone for
+BowlingScorecard[3][10][1] = 0 #Number of overs bowled
+BowlingScorecard[4][10][1] = 0 #Number of maiden overs
+
+#Innings 3
+
+BowlingScorecard[0][0][2] = Cricketer[0][0][Variable[6]]
+BowlingScorecard[1][0][2] = 0 #Wickets
+BowlingScorecard[2][0][2] = 0 #Runs gone for
+BowlingScorecard[3][0][2] = 0 #Number of overs bowled
+BowlingScorecard[4][0][2] = 0 #Number of maiden overs
+
+BowlingScorecard[0][1][2] = Cricketer[0][1][Variable[6]]
+BowlingScorecard[1][1][2] = 0 #Wickets
+BowlingScorecard[2][1][2] = 0 #Runs gone for
+BowlingScorecard[3][1][2] = 0 #Number of overs bowled
+BowlingScorecard[4][1][2] = 0 #Number of maiden overs
+
+BowlingScorecard[0][2][2] = Cricketer[0][2][Variable[6]]
+BowlingScorecard[1][2][2] = 0 #Wickets
+BowlingScorecard[2][2][2] = 0 #Runs gone for
+BowlingScorecard[3][2][2] = 0 #Number of overs bowled
+BowlingScorecard[4][2][2] = 0 #Number of maiden overs
+
+BowlingScorecard[0][3][2] = Cricketer[0][3][Variable[6]]
+BowlingScorecard[1][3][2] = 0 #Wickets
+BowlingScorecard[2][3][2] = 0 #Runs gone for
+BowlingScorecard[3][3][2] = 0 #Number of overs bowled
+BowlingScorecard[4][3][2] = 0 #Number of maiden overs
+
+BowlingScorecard[0][4][2] = Cricketer[0][4][Variable[6]]
+BowlingScorecard[1][4][2] = 0 #Wickets
+BowlingScorecard[2][4][2] = 0 #Runs gone for
+BowlingScorecard[3][4][2] = 0 #Number of overs bowled
+BowlingScorecard[4][4][2] = 0 #Number of maiden overs
+
+BowlingScorecard[0][5][2] = Cricketer[0][5][Variable[6]]
+BowlingScorecard[1][5][2] = 0 #Wickets
+BowlingScorecard[2][5][2] = 0 #Runs gone for
+BowlingScorecard[3][5][2] = 0 #Number of overs bowled
+BowlingScorecard[4][5][2] = 0 #Number of maiden overs
+
+BowlingScorecard[0][6][2] = Cricketer[0][6][Variable[6]]
+BowlingScorecard[1][6][2] = 0 #Wickets
+BowlingScorecard[2][6][2] = 0 #Runs gone for
+BowlingScorecard[3][6][2] = 0 #Number of overs bowled
+BowlingScorecard[4][6][2] = 0 #Number of maiden overs
+
+BowlingScorecard[0][7][2] = Cricketer[0][7][Variable[6]]
+BowlingScorecard[1][7][2] = 0 #Wickets
+BowlingScorecard[2][7][2] = 0 #Runs gone for
+BowlingScorecard[3][7][2] = 0 #Number of overs bowled
+BowlingScorecard[4][7][2] = 0 #Number of maiden overs
+
+BowlingScorecard[0][8][2] = Cricketer[0][8][Variable[6]]
+BowlingScorecard[1][8][2] = 0 #Wickets
+BowlingScorecard[2][8][2] = 0 #Runs gone for
+BowlingScorecard[3][8][2] = 0 #Number of overs bowled
+BowlingScorecard[4][8][2] = 0 #Number of maiden overs
+
+BowlingScorecard[0][9][2] = Cricketer[0][9][Variable[6]]
+BowlingScorecard[1][9][2] = 0 #Wickets
+BowlingScorecard[2][9][2] = 0 #Runs gone for
+BowlingScorecard[3][9][2] = 0 #Number of overs bowled
+BowlingScorecard[4][9][2] = 0 #Number of maiden overs
+
+BowlingScorecard[0][10][2] = Cricketer[0][10][Variable[6]]
+BowlingScorecard[1][10][2] = 0 #Wickets
+BowlingScorecard[2][10][2] = 0 #Runs gone for
+BowlingScorecard[3][10][2] = 0 #Number of overs bowled
+BowlingScorecard[4][10][2] = 0 #Number of maiden overs
+
+#Innings 4
+
+BowlingScorecard[0][0][3] = Cricketer[0][0][Variable[5]]
+BowlingScorecard[1][0][3] = 0 #Wickets
+BowlingScorecard[2][0][3] = 0 #Runs gone for
+BowlingScorecard[3][0][3] = 0 #Number of overs bowled
+BowlingScorecard[4][0][3] = 0 #Number of maiden overs
+
+BowlingScorecard[0][1][3] = Cricketer[0][1][Variable[5]]
+BowlingScorecard[1][1][3] = 0 #Wickets
+BowlingScorecard[2][1][3] = 0 #Runs gone for
+BowlingScorecard[3][1][3] = 0 #Number of overs bowled
+BowlingScorecard[4][1][3] = 0 #Number of maiden overs
+
+BowlingScorecard[0][2][3] = Cricketer[0][2][Variable[5]]
+BowlingScorecard[1][2][3] = 0 #Wickets
+BowlingScorecard[2][2][3] = 0 #Runs gone for
+BowlingScorecard[3][2][3] = 0 #Number of overs bowled
+BowlingScorecard[4][2][3] = 0 #Number of maiden overs
+
+BowlingScorecard[0][3][3] = Cricketer[0][3][Variable[5]]
+BowlingScorecard[1][3][3] = 0 #Wickets
+BowlingScorecard[2][3][3] = 0 #Runs gone for
+BowlingScorecard[3][3][3] = 0 #Number of overs bowled
+BowlingScorecard[4][3][3] = 0 #Number of maiden overs
+
+BowlingScorecard[0][4][3] = Cricketer[0][4][Variable[5]]
+BowlingScorecard[1][4][3] = 0 #Wickets
+BowlingScorecard[2][4][3] = 0 #Runs gone for
+BowlingScorecard[3][4][3] = 0 #Number of overs bowled
+BowlingScorecard[4][4][3] = 0 #Number of maiden overs
+
+BowlingScorecard[0][5][3] = Cricketer[0][5][Variable[5]]
+BowlingScorecard[1][5][3] = 0 #Wickets
+BowlingScorecard[2][5][3] = 0 #Runs gone for
+BowlingScorecard[3][5][3] = 0 #Number of overs bowled
+BowlingScorecard[4][5][3] = 0 #Number of maiden overs
+
+BowlingScorecard[0][6][3] = Cricketer[0][6][Variable[5]]
+BowlingScorecard[1][6][3] = 0 #Wickets
+BowlingScorecard[2][6][3] = 0 #Runs gone for
+BowlingScorecard[3][6][3] = 0 #Number of overs bowled
+BowlingScorecard[4][6][3] = 0 #Number of maiden overs
+
+BowlingScorecard[0][7][3] = Cricketer[0][7][Variable[5]]
+BowlingScorecard[1][7][3] = 0 #Wickets
+BowlingScorecard[2][7][3] = 0 #Runs gone for
+BowlingScorecard[3][7][3] = 0 #Number of overs bowled
+BowlingScorecard[4][7][3] = 0 #Number of maiden overs
+
+BowlingScorecard[0][8][3] = Cricketer[0][8][Variable[5]]
+BowlingScorecard[1][8][3] = 0 #Wickets
+BowlingScorecard[2][8][3] = 0 #Runs gone for
+BowlingScorecard[3][8][3] = 0 #Number of overs bowled
+BowlingScorecard[4][8][3] = 0 #Number of maiden overs
+
+BowlingScorecard[0][9][3] = Cricketer[0][9][Variable[5]]
+BowlingScorecard[1][9][3] = 0 #Wickets
+BowlingScorecard[2][9][3] = 0 #Runs gone for
+BowlingScorecard[3][9][3] = 0 #Number of overs bowled
+BowlingScorecard[4][9][3] = 0 #Number of maiden overs
+
+BowlingScorecard[0][10][3] = Cricketer[0][10][Variable[5]]
+BowlingScorecard[1][10][3] = 0 #Wickets
+BowlingScorecard[2][10][3] = 0 #Runs gone for
+BowlingScorecard[3][10][3] = 0 #Number of overs bowled
+BowlingScorecard[4][10][3] = 0 #Number of maiden overs
+
+
+#Chance of there being a wicket:
+def ChanceofWicketFunction(BattersScore,BowlersScore):
+  ChanceOfWicket = ((150 - (BattersScore) / (BowlersScore))**2)/4
+  ChanceOfWicket = round(ChanceOfWicket,0)
+  return(ChanceOfWicket)
+
+
+
+
+#This function simulates an over
+def AnOver(FirstBat,SecondBat,CurrentBat,Bowler,BattingTeam,BowlingTeam,Innings,BowlOversInARow):
+    BallCount = 1
+    RunsOffOver = 0
+    ByeCount = 0
+    print("Over:", MainScorecard[2][Innings] + 1)
+    #There are 6 balls in a normal over (unless there is a wide or no-ball, in which case the ball is played again.
+    while BallCount < 7:
+        BattingScorecard[2][CurrentBat][Innings] = BattingScorecard[2][CurrentBat][Innings] + 1 #A ball is added on to the batsmen's "balls faced"
+        BattersScore = BatterScore(Cricketer[3][CurrentBat][BattingTeam],Cricketer[2][CurrentBat][BattingTeam],BattingScorecard[1][CurrentBat][Innings],BattingScorecard[2][CurrentBat][Innings])#To get the batsmen score.
+        BowlersScore = BowlerScore(Cricketer[6][Bowler][BowlingTeam],BowlingScorecard[1][Bowler][Innings],BowlingScorecard[3][Bowler][Innings],BowlingScorecard[4][Bowler][Innings],Cricketer[7][Bowler][BowlingTeam],BowlOversInARow,PitchSeam,PitchSpin,MainScorecard[2][Innings])#To get to the bowler score.
+        ChanceOfWicket = ChanceofWicketFunction(BattersScore,BowlersScore) #To get the chance of a wicket happening
+        RandomFielder = random.randint(0,10)#If a fielder is involved in the dismissal, which fielder it is, is chosen now.
+        RandomBall = random.randint(0,100000)
+        if RandomBall < ChanceOfWicket: #ChanceOfWicket will be in the 1000's and so if the RandomBall comes up as a number below chance of wicket, then there wil be a wicket.
+            HowBatsmenGetsOut = HowBatsmenGetsOutFunction(Cricketer[7][Bowler][BowlingTeam],Cricketer[0][Bowler][BowlingTeam],Cricketer[0][RandomFielder][BowlingTeam])#If RandomBall is less than ChanceOfWicket, it will then decide how the batsmen got out (based on actual test match statistics of no people get out). The function returns the way they got out.
+            BowlingScorecard[1][Bowler][Innings] = BowlingScorecard[1][Bowler][Innings] + 1 #Wickets for the bowler is increased by 1
+            BattingScorecard[5][CurrentBat][Innings] = HowBatsmenGetsOut #The way they got out is put on the scorecard.
+            print("Ball", BallCount, ":", HowBatsmenGetsOut)
+            print("")
+            print("(", (CurrentBat + 1), ")", BattingScorecard[0][CurrentBat][Innings], " | ",  "(", BattingScorecard[5][CurrentBat][Innings], ")", BattingScorecard[1][CurrentBat][Innings], "(", (BattingScorecard[2][CurrentBat][Innings]), ") | ", "(", (BattingScorecard[3][CurrentBat][Innings]), ") 4's and (", (BattingScorecard[4][CurrentBat][Innings]), ") 6's")
+            print("")
+            MainScorecard[1][Innings] = MainScorecard[1][Innings] + 1 #The wickets in the main scorecard is increased by 1
+            #When a batsmen gets out, the next batsmens comes in.
+            if CurrentBat == FirstBat:
+                FirstBat = BatsmenQueue.pop()
+                CurrentBat = FirstBat
+            elif CurrentBat == SecondBat:
+                SecondBat = BatsmenQueue.pop()
+                CurrentBat = SecondBat
+        else: #If RandomBall is more than ChanceOfWicket (if there isn't a wicket):
+            #RunsOffBall
+            RunsOffBall = RunsScored(Cricketer[2][CurrentBat][BattingTeam],ChanceOfWicket) #To find out how many runs (or none) were off the ball.
+            #Chance of an extra
+            ChanceOfExtra = random.randint(0,1000)
+            if RunsOffBall == 0:
+                #Extras are uncommon
+                if ChanceOfExtra < 992:
+                    print("Ball", BallCount, ":", RunsOffBall)
+                elif ChanceOfExtra < 994:
+                    #A wide means an extra run is added to the total, and the bowler's total (not the batsmen's total) and that another ball needs to be bowled.
+                    #It doesn't count as a ball faced for the batsmen.
+                    RunsOffBall = "Wide"
+                    RunsOffOver = RunsOffOver + 1
+                    BowlingScorecard[2][Bowler][Innings] = BowlingScorecard[2][Bowler][Innings] + 1
+                    BattingScorecard[2][CurrentBat][Innings] = BattingScorecard[2][CurrentBat][Innings] - 1
+                    print("Ball", BallCount, ":", RunsOffBall)
+                    BallCount = BallCount - 1 #The ball is repeated
+                elif ChanceOfExtra < 997:
+                    #A no-ball means  an extra run is added to the total, and the bowler's total (not the batsmen's total) and that another ball needs to be bowled.
+                    #But also the batsmen can score off the ball. This part is where the batsmen DOESN'T score.
+                    #It counts as a ball faced for the batsmen.
+                    RunsOffBall = "No-Ball"
+                    RunsOffOver = RunsOffOver + 1
+                    BowlingScorecard[2][Bowler][Innings] = BowlingScorecard[2][Bowler][Innings] + 1
+                    print("Ball", BallCount, ":", RunsOffBall)
+                    BallCount = BallCount - 1 #The ball is repeated
+                elif ChanceOfExtra < 999:
+                    #A bye means an extra run is put on the total, but not on the bowler's or batsmen's total.
+                    #It doesn't mean an extra ball needs to be faced.
+                    HowLargeTheByeIs = random.randint(0,10)
+                    if HowLargeTheByeIs < 4:
+                        RunsOffOver = RunsOffOver + 1
+                        ByeCount = ByeCount + 1
+                        print("Ball", BallCount, ": Bye(1 run)")
+                        if CurrentBat == FirstBat:
+                            CurrentBat = SecondBat
+                        elif CurrentBat == SecondBat:
+                            CurrentBat = FirstBat
+                    elif HowLargeTheByeIs < 6:
+                        RunsOffOver = RunsOffOver + 2
+                        ByeCount = ByeCount + 2
+                        print("Ball", BallCount, ": Bye(2 runs)")
+                    elif HowLargeTheByeIs < 7:
+                        RunsOffOver = RunsOffOver + 3
+                        ByeCount = ByeCount + 3
+                        print("Ball", BallCount, ": Bye(3 runs)")
+
+                        #As they run an odd amount of runs, the batsmen swap ends
+                        if CurrentBat == FirstBat:
+                            CurrentBat = SecondBat
+                        elif CurrentBat == SecondBat:
+                            CurrentBat = FirstBat
+                    else:
+                        RunsOffOver = RunsOffOver + 4
+                        ByeCount = ByeCount + 4
+                        print("Ball", BallCount, ": Bye(4 runs)")
+                else:
+                    #A leg-bye means an extra run is put on the total and on the bowler's total, but not the batsmen's total.
+                    #It doesn't mean an extra ball needs to be faced.
+                    HowLargeTheLegByeIs = random.randint(0,10)
+                    if HowLargeTheLegByeIs < 4:
+                        RunsOffOver = RunsOffOver + 1
+                        print("Ball", BallCount, ": Leg-bye(1 run)")
+                        BowlingScorecard[2][Bowler][Innings] = BowlingScorecard[2][Bowler][Innings] + 1
+                        if CurrentBat == FirstBat:
+                            CurrentBat = SecondBat
+                        elif CurrentBat == SecondBat:
+                            CurrentBat = FirstBat
+                    elif HowLargeTheLegByeIs < 6:
+                        RunsOffOver = RunsOffOver + 2
+                        print("Ball", BallCount, ": Leg-bye(2 runs)")
+                        BowlingScorecard[2][Bowler][Innings] = BowlingScorecard[2][Bowler][Innings] + 2
+                    elif HowLargeTheLegByeIs < 7:
+                        RunsOffOver = RunsOffOver + 3
+                        print("Ball", BallCount, ": Leg-bye(3 runs)")
+                        BowlingScorecard[2][Bowler][Innings] = BowlingScorecard[2][Bowler][Innings] + 3
+                        #As they run an odd amount of runs, the batsmen swap ends
+                        if CurrentBat == FirstBat:
+                            CurrentBat = SecondBat
+                        elif CurrentBat == SecondBat:
+                            CurrentBat = FirstBat
+                    else:
+                        RunsOffOver = RunsOffOver + 4
+                        print("Ball", BallCount, ": Leg-bye(4 runs)")
+                        BowlingScorecard[2][Bowler][Innings] = BowlingScorecard[2][Bowler][Innings] + 4
+                       
+            else:
+                BattingScorecard[1][CurrentBat][Innings] = BattingScorecard[1][CurrentBat][Innings] + RunsOffBall #If there are runs scored off the ball, they are added to th bastmen's scorecard.
+                BowlingScorecard[2][Bowler][Innings] = BowlingScorecard[2][Bowler][Innings] + RunsOffBall ##If there are runs scored off the ball, they are added to th bowler's scorecard.
+                #See if the batsmen need to swap strike (if there is an odd amount of runs scored.)
+                if RunsOffBall == 1 or RunsOffBall == 3 or RunsOffBall == 5:
+                    if CurrentBat == FirstBat:
+                        CurrentBat = SecondBat
+                    elif CurrentBat == SecondBat:
+                        CurrentBat = FirstBat
+                #Number of 4's and 6's each batsmen scores are listed on the scorecard.
+                elif RunsOffBall == 4:
+                    BattingScorecard[3][CurrentBat][Innings] = BattingScorecard[3][CurrentBat][Innings] + 1
+                elif RunsOffBall == 6:
+                    BattingScorecard[4][CurrentBat][Innings] = BattingScorecard[4][CurrentBat][Innings] + 1
+                #Chance of a No-Ball
+                ChanceOfANoBall = random.randint(0,1000)
+                if ChanceOfANoBall < 5:
+                    #A no-ball means  an extra run is added to the total, and the bowler's total (not the batsmen's total) and that another ball needs to be bowled.
+                    #But also the batsmen can score off the ball. This part is where the batsmen DOES score.
+                    #It counts as a ball faced for the batsmen.
+                    RunsOffOver = RunsOffOver + RunsOffBall + 1 #The runs off the over is added to the runs off this ball, plus 1 for the no-ball.
+                    RunsOffBall = str(RunsOffBall)
+                    RunsOffBall = ("No-Ball(+" + RunsOffBall + ")")
+                    BowlingScorecard[2][Bowler][Innings] = BowlingScorecard[2][Bowler][Innings] + 1 #Runs are added to the bowler's scorecard
+                    print("Ball", BallCount, ":", RunsOffBall)
+                    BallCount = BallCount - 1 #The ball is repeated as it is a no-ball
+                else:
+                    RunsOffOver = RunsOffOver + RunsOffBall
+                    print("Ball", BallCount, ":", RunsOffBall)
+        BallCount = BallCount + 1 #A  ball is completed.
+        if MainScorecard[1][Innings] == 10: #If all 10 wickets are gone, the innings is over.
+            BatsmenQueue.append(11)
+            BatsmenQueue.append(10)
+            BatsmenQueue.append(9)
+            BatsmenQueue.append(8)
+            BatsmenQueue.append(7)
+            BatsmenQueue.append(6)
+            BatsmenQueue.append(5)
+            BatsmenQueue.append(4)
+            BatsmenQueue.append(3)
+            BatsmenQueue.append(2)
+            PartOver = (BallCount - 1) / 10
+            if PartOver == 0.6:
+                #To display it on the scorecard.
+                TotalOvers = MainScorecard[2][Innings] + 1 #A full over is bowled.
+                BowlingScorecard[3][Bowler][Innings] = BowlingScorecard[3][Bowler][Innings] + 1
+            else:
+                #If a full over isn't bowled at the end of an innings, it will show that the innings lasted (for example:) 57.5 overs.
+                TotalOvers = PartOver + MainScorecard[2][Innings]
+                MainScorecard[2][Innings] = TotalOvers
+                BowlingScorecard[3][Bowler][Innings] = BowlingScorecard[3][Bowler][Innings] + PartOver #If a full over isn't bowled at the end of an innings, it will show that the innings lasted (for example:) 57.5 overs on the bowler's scorecard.
+            print(MainScorecard[0][Innings], "/", MainScorecard[1][Innings], "off", TotalOvers, "overs") #The overall result of the innings.
+            if Variable[5] == 0: #Change over of which teams are batting and bowling
+                Variable[5] = 1
+                Variable[6] = 0
+            else:
+                Variable[5] = 0
+                Variable[6] = 1
+            Variable[7] = Variable[7] + 1 #Change of innings.
+            Variable[0] = 0 #First Batsmen
+            Variable[1] = 1 #Second Batsmen
+            Variable[3] = 0 #Batter on strike
+            BallCount = BallCount + 10 #ends the over if the innings is over.
+    if BallCount == 7:
+        BowlingScorecard[3][Bowler][Innings] = BowlingScorecard[3][Bowler][Innings] + 1 #An over is added to the bowler's scorecard.
+        MainScorecard[0][Innings] = MainScorecard[0][Innings] + RunsOffOver #The amount of runs off the over is added to the main scorecard.
+        MainScorecard[2][Innings] = MainScorecard[2][Innings] + 1 #An over is added to the main scorecard.
+        if RunsOffOver - ByeCount == 0:
+            BowlingScorecard[4][Bowler][Innings] = BowlingScorecard[4][Bowler][Innings] + 1 #If no runs are scored off the over, then a maiden over is added to the bowler's scorecard.
+        #An update on the bowler who just bowled and the batsmen in at the moment.
+        print("")
+        print("(", (FirstBat + 1), ")", BattingScorecard[0][FirstBat][Innings], " | ",  BattingScorecard[1][FirstBat][Innings], "*(", (BattingScorecard[2][FirstBat][Innings]), ") | ", "(", (BattingScorecard[3][FirstBat][Innings]), ") 4's and (", (BattingScorecard[4][FirstBat][Innings]), ") 6's")
+        print("")
+        print("(", (SecondBat + 1), ")", BattingScorecard[0][SecondBat][Innings], " | ",  BattingScorecard[1][SecondBat][Innings], "*(", (BattingScorecard[2][SecondBat][Innings]), ") | ", "(", (BattingScorecard[3][SecondBat][Innings]), ") 4's and (", (BattingScorecard[4][SecondBat][Innings]), ") 6's")
+        print("")
+        print("(", (Bowler + 1), ")", BowlingScorecard[0][Bowler][Innings], " | ", BowlingScorecard[1][Bowler][Innings], "/ ", BowlingScorecard[2][Bowler][Innings], "(", BowlingScorecard[3][Bowler][Innings], ")", "Maidens: ", BowlingScorecard[4][Bowler][Innings])
+        print("")
+        if MainScorecard[2][0] == 1:
+            print(MainScorecard[0][Innings], "/", MainScorecard[1][Innings], "off", MainScorecard[2][Innings], "over")
+        else:
+            print(MainScorecard[0][Innings], "/", MainScorecard[1][Innings], "off", MainScorecard[2][Innings], "overs")
+        print("")
+        if CurrentBat == FirstBat: #Batsmen swap who is facing when there is a new over.
+            CurrentBat = SecondBat
+        elif CurrentBat == SecondBat:
+            CurrentBat = FirstBat
+        #Turns local into global varibles
+        Variable[0] = FirstBat
+        Variable[1] = SecondBat
+        Variable[3] = CurrentBat
+        Variable[4] = Bowler
+
+#Picks who will bowl the next few overs based on their score. The higher the score, the higher the chance of them bowling.
+def PickBowler(BowlingTeam,Innings,RecentBowler,Bowler1OversInRow,Bowler2OversInRow,Bowler1,Bowler2):
+    #Only fast bowlers normally bowl at the start of the innings
+    ChangeBowler = True
+    if MainScorecard[2][Innings] < 10: #The first 10 overs are already set who will bowl them.
+        ChangeBowler = False
+        #Doesn't allow the second opening bowler to bowl 2 overs in a row
+        if Variable[6] == 0:
+            Variable[8] = 9
+        else:
+            Variable[8] = 7
+        if MainScorecard[2][Innings] % 2 == 1: #Which end the they are selecting the bowler to bowl from.
+            if BowlingTeam == 0:
+                Variable[12] = 9
+                return(9)
+            else:
+                Variable[12] = 7
+                return(7)
+        else:
+            if BowlingTeam == 0:
+                Variable[11] = 10
+                return(10)
+            else:
+                Variable[11] = 8
+                return(8)
+    RandomAmountOfOvers = random.randint(0,1) #To add variation between bowler spell lengths.
+    #To see which bowler is bowling:
+    if MainScorecard[2][Innings] % 2 == 0 and MainScorecard[2][Innings] > 11:
+        #To see whether the current bowler bowls spin or fast (spin bowlers normally bowl more overs in a row than fast bowlers):
+        if Cricketer[7][Bowler1][BowlingTeam] == "Spin":
+            #It is rare for a spin bowler to be taken off before bowling at least 6 overs:
+            if Bowler1OversInRow > 5:
+                #To randomise how many overs they bowl:
+                if RandomAmountOfOvers == 1:
+                    Bowler1OversInRow = Bowler1OversInRow + 1
+                    Variable[9] = Bowler1OversInRow
+                    Variable[8] = Bowler1
+                    return(Bowler1)
+                else:
+                    ChangeBowler = True
+            else:
+                Bowler1OversInRow = Bowler1OversInRow + 1
+                Variable[9] = Bowler1OversInRow
+                Variable[8] = Bowler1
+                return(Bowler1)
+        else:
+            #It is rare for a fast bowler to be taken off before bowling at least 4 overs:
+            if Bowler1OversInRow > 3:
+                #To randomise how many overs they bowl:
+                if RandomAmountOfOvers == 1:
+                    Bowler1OversInRow = Bowler1OversInRow + 1
+                    Variable[9] = Bowler1OversInRow
+                    Variable[8] = Bowler1
+                    return(Bowler1)
+                else:
+                    ChangeBowler = True
+            else:
+                Bowler1OversInRow = Bowler1OversInRow + 1
+                Variable[9] = Bowler1OversInRow
+                Variable[8] = Bowler1
+                return(Bowler1)
+    if MainScorecard[2][Innings] % 2 == 1 and MainScorecard[2][Innings] > 11:
+        #To see whether the current bowler bowls spin or fast (spin bowlers normally bowl more overs in a row than fast bowlers):
+        if Cricketer[7][Bowler2][BowlingTeam] == "Spin":
+            #It is rare for a spin bowler to be taken off before bowling at least 6 overs:
+            if Bowler1OversInRow > 5:
+                #To randomise how many overs they bowl:
+                if RandomAmountOfOvers == 1:
+                    Bowler2OversInRow = Bowler2OversInRow + 1
+                    Variable[10] = Bowler2OversInRow
+                    Variable[8] = Bowler2
+                    return(Bowler2)
+                else:
+                    ChangeBowler = True
+            else:
+                Bowler2OversInRow = Bowler2OversInRow + 1
+                Variable[10] = Bowler2OversInRow
+                Variable[8] = Bowler2
+                return(Bowler2)
+        else:
+            #It is rare for a fast bowler to be taken off before bowling at least 4 overs:
+            if Bowler2OversInRow > 3:
+                #To randomise how many overs they bowl:
+                if RandomAmountOfOvers == 1:
+                    Bowler2OversInRow = Bowler2OversInRow + 1
+                    Variable[10] = Bowler2OversInRow
+                    Variable[8] = Bowler2
+                    return(Bowler2)
+                else:
+                    ChangeBowler = True
+            else:
+                Bowler2OversInRow = Bowler2OversInRow + 1
+                Variable[10] = Bowler2OversInRow
+                Variable[8] = Bowler2
+                return(Bowler2)
+    #If the bowler spell is over.
+    if ChangeBowler == True:
+        Total = 0
+        if MainScorecard[2][Innings] % 2 == 0:
+            Bowler1OversInRow = 1
+            for i in range(0,11):
+                if Cricketer[4][i][BowlingTeam] == "Y":
+                    if i != RecentBowler: #The same bowler can't be selected again.
+                        BowlersScore = BowlerScore(Cricketer[6][i][BowlingTeam],BowlingScorecard[1][i][Innings],BowlingScorecard[3][i][Innings],BowlingScorecard[4][i][Innings],Cricketer[7][i][BowlingTeam],1,PitchSeam,PitchSpin,MainScorecard[2][Innings])
+                        BowlersScore = round(BowlersScore * 100)
+                        Total = BowlersScore + Total
+            RandomBowler = random.randint(0,Total)
+            RunningTotal = 0
+            for i in range(0,11):
+                if Cricketer[4][i][BowlingTeam] == "Y":
+                    if i != RecentBowler:
+                        BowlersScore = BowlerScore(Cricketer[6][i][BowlingTeam],BowlingScorecard[1][i][Innings],BowlingScorecard[3][i][Innings],BowlingScorecard[4][i][Innings],Cricketer[7][i][BowlingTeam],1,PitchSeam,PitchSpin,MainScorecard[2][Innings])
+                        BowlersScore = round(BowlersScore * 100)
+                        RunningTotal = BowlersScore + RunningTotal
+                        if RandomBowler <= RunningTotal: #It will choose from the bowlers based on their score. The higher the bowler's score, the more likely they will bowl.
+                            Variable[8] = i #Recent bowler
+                            Variable[11] = i #1st bowler
+                            Variable[9] = Bowler1OversInRow
+                            i = i + 15
+                            return(Variable[8])
+        else:
+            Bowler2OversInRow = 1
+            for i in range(0,11):
+                if Cricketer[4][i][BowlingTeam] == "Y":
+                    if i != RecentBowler: #The same bowler can't be selected again
+                        BowlersScore = BowlerScore(Cricketer[6][i][BowlingTeam],BowlingScorecard[1][i][Innings],BowlingScorecard[3][i][Innings],BowlingScorecard[4][i][Innings],Cricketer[7][i][BowlingTeam],1,PitchSeam,PitchSpin,MainScorecard[2][Innings])
+                        BowlersScore = round(BowlersScore * 100)
+                        Total = BowlersScore + Total
+            RandomBowler = random.randint(0,Total)
+            RunningTotal = 0
+            for i in range(0,11):
+                if Cricketer[4][i][BowlingTeam] == "Y":
+                    if i != RecentBowler:
+                        BowlersScore = BowlerScore(Cricketer[6][i][BowlingTeam],BowlingScorecard[1][i][Innings],BowlingScorecard[3][i][Innings],BowlingScorecard[4][i][Innings],Cricketer[7][i][BowlingTeam],1,PitchSeam,PitchSpin,MainScorecard[2][Innings])
+                        BowlersScore = round(BowlersScore * 100)
+                        RunningTotal = BowlersScore + RunningTotal
+                        if RandomBowler <= RunningTotal: #It will choose from the bowlers based on their score. The higher the bowler's score, the more likely they will bowl.
+                            Variable[8] = i #Recent bowler
+                            Variable[12] = i # 2nd bowler
+                            Variable[10] = Bowler2OversInRow
+                            i = i + 15
+                            return(Variable[8])
+
+   
+for j in range(1,6):#5 days in a test match
+    Day = j
+    print("Start of Day: ", Day)
+    print("")
+    for i in range(0,90): #90 overs in a test day
+        if i == 30:
+            print("Lunch, Day: ", Day)
+            print("")
+        elif i == 60:
+            print("Tea, Day: ", Day)
+            print("")
+        Variable[4] = PickBowler(Variable[6],Variable[7],Variable[8],Variable[9],Variable[10],Variable[11],Variable[12])#The bowler chosen.
+        if MainScorecard[2][Variable[7]] > 10:
+            if MainScorecard[2][Variable[7]] % 2 == 0:
+                AnOver(Variable[0],Variable[1],Variable[3],Variable[4],Variable[5],Variable[6],Variable[7],Variable[9])#Amount of overs in a row by bowler 1.
+            else:
+                AnOver(Variable[0],Variable[1],Variable[3],Variable[4],Variable[5],Variable[6],Variable[7],Variable[10])#Amount of overs in a row by bowler 2.
+        else:
+            OversInARow = MainScorecard[2][Variable[7]] // 2 #If it is in the first 10 overs, the amount of overs the opening bowlers have bowled isn't counted.
+            #So it will instead divide the total overs bowled so far divided by 2 which will do the same thing.
+            AnOver(Variable[0],Variable[1],Variable[3],Variable[4],Variable[5],Variable[6],Variable[7],OversInARow)
+        if MainScorecard[1][2] == 10 and MainScorecard[1][3] == 0: #To see if the team batting first need to bat or if they have already won.
+            if (MainScorecard[0][1]) > (MainScorecard[0][0] + MainScorecard[0][2]):
+                Difference = str(MainScorecard[0][1] - (MainScorecard[0][0] + MainScorecard[0][2]))
+                if Variable[5] == 0:
+                    print("England won by", Difference, "run(s) and an innings.")
+                    print("")
+                    print("Australia(1st):", MainScorecard[0][0], "/", MainScorecard[1][0], "off", MainScorecard[2][0], "overs")
+                    print("England(1st):", MainScorecard[0][1], "/", MainScorecard[1][1], "off", MainScorecard[2][1], "overs")
+                    print("Australia(2nd):", MainScorecard[0][2], "/", MainScorecard[1][2], "off", MainScorecard[2][2], "overs")
+                else:
+                    print("Australia won by", Difference, "runs and an innings.")
+                    print("")
+                    print("England(1st):", MainScorecard[0][0], "/", MainScorecard[1][0], "off", MainScorecard[2][0], "overs")
+                    print("Australia(1st):", MainScorecard[0][1], "/", MainScorecard[1][1], "off", MainScorecard[2][1], "overs")
+                    print("England(2nd):", MainScorecard[0][2], "/", MainScorecard[1][2], "off", MainScorecard[2][2], "overs")
+                Winner = True
+        elif (MainScorecard[0][1] + MainScorecard[0][3]) > (MainScorecard[0][0] + MainScorecard[0][2]) and Variable[7] == 3: #The team batting second won.
+            WicketsLeft = 10 - MainScorecard[1][3]
+            if Variable[5] == 0:
+                print("England won by", WicketsLeft, "wickets.")
+                print("")
+                print("Australia(1st):", MainScorecard[0][0], "/", MainScorecard[1][0], "off", MainScorecard[2][0], "overs")
+                print("England(1st):", MainScorecard[0][1], "/", MainScorecard[1][1], "off", MainScorecard[2][1], "overs")
+                print("Australia(2nd):", MainScorecard[0][2], "/", MainScorecard[1][2], "off", MainScorecard[2][2], "overs")
+                print("England(2nd):", MainScorecard[0][3], "/", MainScorecard[1][3], "off", MainScorecard[2][3], "overs")
+            else:
+                print("Australia won by", WicketsLeft, "wickets.")
+                print("")
+                print("England(1st):", MainScorecard[0][0], "/", MainScorecard[1][0], "off", MainScorecard[2][0], "overs")
+                print("Australia(1st):", MainScorecard[0][1], "/", MainScorecard[1][1], "off", MainScorecard[2][1], "overs")
+                print("England(2nd):", MainScorecard[0][2], "/", MainScorecard[1][2], "off", MainScorecard[2][2], "overs")
+                print("Australia(2nd):", MainScorecard[0][3], "/", MainScorecard[1][3], "off", MainScorecard[2][3], "overs")
+            Winner = True
+        elif MainScorecard[1][3] == 10:
+            if (MainScorecard[0][0] + MainScorecard[0][2]) > (MainScorecard[0][1] + MainScorecard[0][3]):
+                Difference = str((MainScorecard[0][0] + MainScorecard[0][2]) - (MainScorecard[0][1] + MainScorecard[0][3]))
+                if Variable[5] == 0:
+                    print("England won by", Difference, "runs.")
+                    print("")
+                    print("England(1st):", MainScorecard[0][0], "/", MainScorecard[1][0], "off", MainScorecard[2][0], "overs")
+                    print("Australia(1st):", MainScorecard[0][1], "/", MainScorecard[1][1], "off", MainScorecard[2][1], "overs")
+                    print("England(2nd):", MainScorecard[0][2], "/", MainScorecard[1][2], "off", MainScorecard[2][2], "overs")
+                    print("Australia(2nd):", MainScorecard[0][3], "/", MainScorecard[1][3], "off", MainScorecard[2][3], "overs")
+                else:
+                    print("Australia won by", Difference, "runs.")
+                    print("")
+                    print("Australia(1st):", MainScorecard[0][0], "/", MainScorecard[1][0], "off", MainScorecard[2][0], "overs")
+                    print("England(1st):", MainScorecard[0][1], "/", MainScorecard[1][1], "off", MainScorecard[2][1], "overs")
+                    print("Australia(2nd):", MainScorecard[0][2], "/", MainScorecard[1][2], "off", MainScorecard[2][2], "overs")
+                    print("England(2nd):", MainScorecard[0][3], "/", MainScorecard[1][3], "off", MainScorecard[2][3], "overs")
+            else:
+                print("Tie.")
+                print("")
+                if Variable[5] == 0:
+                    print("England(1st):", MainScorecard[0][0], "/", MainScorecard[1][0], "off", MainScorecard[2][0], "overs")
+                    print("Australia(1st):", MainScorecard[0][1], "/", MainScorecard[1][1], "off", MainScorecard[2][1], "overs")
+                    print("England(2nd):", MainScorecard[0][2], "/", MainScorecard[1][2], "off", MainScorecard[2][2], "overs")
+                    print("Australia(2nd):", MainScorecard[0][3], "/", MainScorecard[1][3], "off", MainScorecard[2][3], "overs")
+                else:
+                    print("Australia(1st):", MainScorecard[0][0], "/", MainScorecard[1][0], "off", MainScorecard[2][0], "overs")
+                    print("England(1st):", MainScorecard[0][1], "/", MainScorecard[1][1], "off", MainScorecard[2][1], "overs")
+                    print("Australia(2nd):", MainScorecard[0][2], "/", MainScorecard[1][2], "off", MainScorecard[2][2], "overs")
+                    print("England(2nd):", MainScorecard[0][3], "/", MainScorecard[1][3], "off", MainScorecard[2][3], "overs")
+            Winner = True
+       
+        if Winner == True:
+            break
+    if Winner == True:
+        break
+    #PitchSpin = PitchSpin + random.randint(0,5) #The pitch will get more spin advantageous throughout the match.
+    RandomSeam = random.randint(0,1)
+    if RandomSeam == 0: #How advantageous or disadvantageous the pitch is for fast bowlers will change throughout the match.
+        PitchSeam = PitchSeam + random.randint(0,2)
+    else:
+        PitchSeam = PitchSeam - random.randint(0,2)
+    if Winner == True:
+        break
+if Winner == False:
+    print("Draw.")
+    print("")
+    if Variable[5] == 1:
+        print("England(1st):", MainScorecard[0][0], "/", MainScorecard[1][0], "off", MainScorecard[2][0], "overs")
+        print("Australia(1st):", MainScorecard[0][1], "/", MainScorecard[1][1], "off", MainScorecard[2][1], "overs")
+        print("England(2nd):", MainScorecard[0][2], "/", MainScorecard[1][2], "off", MainScorecard[2][2], "overs")
+        print("Australia(2nd):", MainScorecard[0][3], "/", MainScorecard[1][3], "off", MainScorecard[2][3], "overs")
+    else:
+        print("Australia(1st):", MainScorecard[0][0], "/", MainScorecard[1][0], "off", MainScorecard[2][0], "overs")
+        print("England(1st):", MainScorecard[0][1], "/", MainScorecard[1][1], "off", MainScorecard[2][1], "overs")
+        print("Australia(2nd):", MainScorecard[0][2], "/", MainScorecard[1][2], "off", MainScorecard[2][2], "overs")
+        print("England(2nd):", MainScorecard[0][3], "/", MainScorecard[1][3], "off", MainScorecard[2][3], "overs")
+
+UserStats = input("Do you want to see the batting and bowling stats? (y for yes): ")
+UserStats = UserStats.lower()
+if UserStats == "y" or UserStats == "yes":
+    for i in range(0,4):
+        print("Innings", (i+1), "Batting:")
+        for j in range(0,11):
+            if BattingScorecard[2][j][i] > 0:
+                print("(", (j+1), ")", BattingScorecard[0][j][i], " | ", "(", (BattingScorecard[5][j][i]), ")", BattingScorecard[1][j][i], "(", (BattingScorecard[2][j][i]), ") | ", "(", (BattingScorecard[3][j][i]), ") 4's and (", (BattingScorecard[4][j][i]), ") 6's")
+       
+        print("")
+        print("Innings", (i+1), "Bowling:")
+        for k in range(0,11):
+            if BowlingScorecard[3][k][i] > 0:
+                #print(i)
+                #print(k)
+                print("(", (k+1), ")", BowlingScorecard[0][k][i], " | ", BowlingScorecard[1][k][i], "/ ", BowlingScorecard[2][k][i], "(", BowlingScorecard[3][k][i], ")", "Maidens: ", BowlingScorecard[4][k][i])
+
+        print("")
